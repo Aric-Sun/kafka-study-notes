@@ -1,0 +1,41 @@
+server:
+  port: 8881
+spring:
+  kafka:
+    bootstrap-servers: 192.168.35.128:9092,192.168.35.129:9092,192.168.35.129:9093
+    template:
+      default-topic: bigdata
+    producer: # 生产者
+      retries: 3 # 设置大于 0 的值，则客户端会将发送失败的记录重新发送
+      batch-size: 16384 # kafka线程，从缓冲区拉取满16KB，就发送，默认16KB
+      buffer-memory: 33554432 # 缓冲区大小，存放于生产者上，默认32MB，消息不是立即发送的
+      acks: 1 
+      # 指定消息key和消息体的编解码方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: testGroup
+      enable-auto-commit: false  # 手动提交
+      auto-offset-reset: earliest # 第一次从头开始消费，以后按照消费offset记录继续消费，这个需要区别于consumer.seekToBeginning（每次都从头开始消费）
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500 # 一次poll最多拉取多少条消息
+    listener:
+      # 手动提交的配置
+      # 当每一条记录被消费者监听器（ListenerConsumer）处理之后提交
+      # RECORD
+      # 当每一批poll()的数据被消费者监听器（ListenerConsumer）处理之后提交
+      # BATCH
+      # 当每一批poll()的数据被消费者监听器（ListenerConsumer）处理之后，距离上次提交时间大于TIME时提交
+      # TIME
+      # 当每一批poll()的数据被消费者监听器（ListenerConsumer）处理之后，被处理record数量大于等于COUNT时提交
+      # COUNT
+      # TIME | COUNT　有一个条件满足时提交
+      # COUNT_TIME
+      # 当每一批poll()的数据被消费者监听器（ListenerConsumer）处理之后, 手动调用Acknowledgment.acknowledge()后提交
+      # MANUAL
+      # 手动调用Acknowledgment.acknowledge()后立即提交，一般使用这种
+      # MANUAL_IMMEDIATE
+      ack-mode: MANUAL_IMMEDIATE
+  redis:
+    host: 192.168.35.128
